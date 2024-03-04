@@ -367,10 +367,10 @@ textarea{
   .navbar{
     padding: 10px 0;
     background-color: var(--primary-color);
-    color: var(--primary-text-color);
   }
   .navbar h1{
     font-size: 30px;
+    color: var(--primary-text-color);
   }
   .nav-text{
     display: none;
