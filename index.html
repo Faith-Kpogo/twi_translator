@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap-utilities.css">
+    <link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+    rel="stylesheet"
+/>
+    <link rel="stylesheet" href="style.css" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Language Translater</title>
+  </head>
+  <body>
+    <div class="navbar navbar-expand-sm text-center fw-bold fixed">
+      <div class="container-fluid">
+        <h1>Twi Translator</h1>
+        <h3 class="nav-text">Twi Language Translation And Recognition</h3>
+      </div>
+    </div>  
+
+
+    <div class="container">
+      <div class="card input-wrapper">
+        <div class="from">
+          <span class="heading">From :</span>
+          <div class="dropdown-container" id="input-language">
+            <div class="dropdown-toggle">
+              
+              <span class="selected" data-value="en">English</span>
+              <ion-icon name="chevron-down-outline"></ion-icon>
+            </div>
+            <ul class="dropdown-menu">
+              <li class="option active">DropDown Menu Item 1</li>
+              <li class="option">DropDown Menu Item 2</li>
+            </ul>
+          </div>
+        </div>
+        <div class="text-area">
+          <textarea
+            id="input-text"
+            cols="20"
+            rows="5"
+            placeholder="Enter your text here"
+          ></textarea>
+          <!-- <div class="microphone-icon" id="microphone-icon">
+            <i class="ri-mic-line"></i>
+          </div> -->
+          <div class="chars"><span id="input-chars">0</span> / 5000</div>
+        </div>
+        <div class="card-bottom">
+          <p>Or choose your document!</p>
+          <label for="upload-document">
+            <span id="upload-title">Choose File</span>
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            <input type="file" id="upload-document" hidden />
+          </label>
+        </div>
+      </div>
+
+      <div class="center">
+        <div class="swap-position">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+        </div>
+      </div>
+
+      <div class="card output-wrapper">
+        <div class="to">
+          <span class="heading">To :</span>
+          <div class="dropdown-container" id="output-language">
+            <div class="dropdown-toggle">
+              
+              <span class="selected" data-value="tw">Twi</span>
+              <ion-icon name="chevron-down-outline"></ion-icon>
+            </div>
+            <ul class="dropdown-menu">
+              <li class="option active">DropDown Menu Item 1</li>
+              <li class="option">DropDown Menu Item 2</li>
+            </ul>
+          </div>
+        </div>
+        <div class="copy-link">
+          <textarea
+            id="output-text"
+            cols="20"
+            rows="5"
+            placeholder="Translated text will appear here"
+            disabled
+          ></textarea>
+          <button onclick="copyToClipboard()"><i id="copy-btn" class="ri-file-copy-line"></i></button>
+          <div class="copy-popup" id="copyPopup">Copied!</div>
+        </div>
+        
+        <div class="card-bottom">  
+        </div>
+      </div>
+    </div>
+    <div class="container-fluid social">
+      <div class="row">
+        <div class="col-4 icons">
+          <a href="https://github.com/Faith-Kpogo" target="_blank"><i  class="ri-github-fill"></i></a>
+          <a href="https://twitter.com/XKpogo49108" target="_blank"><i class="ri-twitter-x-line"></i></a>
+          <a href="https://www.facebook.com/profile.php?id=100092461160748" target="_blank"><i class="ri-facebook-fill"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <script src="languages.js"></script>
+    <script src="bootstrap/js/bootstrap.js"></script>
+    <script src="script.js">
+      
+    </script>
+  </body>
+</html>
