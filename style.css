@@ -50,7 +50,7 @@ body .navbar{
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
-  color: var(--light-text-color);
+  color: var(text-color);
 }
 .container {
   position: relative;
@@ -367,7 +367,7 @@ textarea{
   .navbar{
     padding: 10px 0;
     background-color: var(--primary-color);
-    color: var(--light-bg-color);
+    color: var(--primary-text-color);
   }
   .navbar h1{
     font-size: 30px;
