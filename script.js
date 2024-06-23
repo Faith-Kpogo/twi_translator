@@ -1,30 +1,35 @@
 const dropdowns = document.querySelectorAll(".dropdown-container"),
   inputLanguageDropdown = document.querySelector("#input-language"),
-  outputLanguageDropdown = document.querySelector("#output-language");
+  outputLanguageDropdown = document.querySelector("#output-language"),
+  inputTextElem = document.querySelector("#input-text"),
+  outputTextElem = document.querySelector("#output-text"),
+  closeIcon = document.querySelector("#close-icon"),
+  inputChars = document.querySelector("#input-chars");
 
+// Function to populate dropdowns with language options
 function populateDropdown(dropdown, options) {
   dropdown.querySelector("ul").innerHTML = "";
   options.forEach((option) => {
     const li = document.createElement("li");
-    const title = option.name + " (" + option.native + ")";
-    li.innerHTML = title;
+    li.innerHTML = option.name; // Only display the language name
     li.dataset.value = option.code;
     li.classList.add("option");
     dropdown.querySelector("ul").appendChild(li);
   });
 }
 
+// Populate both dropdowns with language options
 populateDropdown(inputLanguageDropdown, languages);
 populateDropdown(outputLanguageDropdown, languages);
 
+// Add event listeners to dropdowns for toggling and selection
 dropdowns.forEach((dropdown) => {
-  dropdown.addEventListener("click", (e) => {
+  dropdown.addEventListener("click", () => {
     dropdown.classList.toggle("active");
   });
 
   dropdown.querySelectorAll(".option").forEach((item) => {
-    item.addEventListener("click", (e) => {
-      //remove active class from current dropdowns
+    item.addEventListener("click", () => {
       dropdown.querySelectorAll(".option").forEach((item) => {
         item.classList.remove("active");
       });
@@ -36,6 +41,8 @@ dropdowns.forEach((dropdown) => {
     });
   });
 });
+
+// Close dropdown if clicked outside
 document.addEventListener("click", (e) => {
   dropdowns.forEach((dropdown) => {
     if (!dropdown.contains(e.target)) {
@@ -44,69 +51,81 @@ document.addEventListener("click", (e) => {
   });
 });
 
-const swapBtn = document.querySelector(".swap-position"),
-  inputLanguage = inputLanguageDropdown.querySelector(".selected"),
-  outputLanguage = outputLanguageDropdown.querySelector(".selected"),
-  inputTextElem = document.querySelector("#input-text"),
-  outputTextElem = document.querySelector("#output-text");
+// Swap languages and text when swap button is clicked
+const swapBtn = document.querySelector(".swap-position");
+swapBtn.addEventListener("click", () => {
+  const tempLang = inputLanguageDropdown.querySelector(".selected").innerHTML;
+  inputLanguageDropdown.querySelector(".selected").innerHTML = outputLanguageDropdown.querySelector(".selected").innerHTML;
+  outputLanguageDropdown.querySelector(".selected").innerHTML = tempLang;
 
-swapBtn.addEventListener("click", (e) => {
-  const temp = inputLanguage.innerHTML;
-  inputLanguage.innerHTML = outputLanguage.innerHTML;
-  outputLanguage.innerHTML = temp;
+  const tempValue = inputLanguageDropdown.querySelector(".selected").dataset.value;
+  inputLanguageDropdown.querySelector(".selected").dataset.value = outputLanguageDropdown.querySelector(".selected").dataset.value;
+  outputLanguageDropdown.querySelector(".selected").dataset.value = tempValue;
 
-  const tempValue = inputLanguage.dataset.value;
-  inputLanguage.dataset.value = outputLanguage.dataset.value;
-  outputLanguage.dataset.value = tempValue;
-
-  //swap text
-  const tempInputText = inputTextElem.value;
+  const tempText = inputTextElem.value;
   inputTextElem.value = outputTextElem.value;
-  outputTextElem.value = tempInputText;
+  outputTextElem.value = tempText;
 
   translate();
 });
 
+// Function to handle translation
 function translate() {
   const inputText = inputTextElem.value;
-  const inputLanguage =
-    inputLanguageDropdown.querySelector(".selected").dataset.value;
-  const outputLanguage =
-    outputLanguageDropdown.querySelector(".selected").dataset.value;
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${inputLanguage}&tl=${outputLanguage}&dt=t&q=${encodeURI(
-    inputText
-  )}`;
+  const inputLanguage = inputLanguageDropdown.querySelector(".selected").dataset.value;
+  const outputLanguage = outputLanguageDropdown.querySelector(".selected").dataset.value;
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${inputLanguage}&tl=${outputLanguage}&dt=t&q=${encodeURI(inputText)}`;
+
   fetch(url)
     .then((response) => response.json())
     .then((json) => {
-      console.log(json);
       outputTextElem.value = json[0].map((item) => item[0]).join("");
     })
     .catch((error) => {
       console.log(error);
     });
 }
-inputTextElem.addEventListener("input", (e) => {
-  //limit input to 5000 characters
+
+// Show the close icon if there is text in the textarea, and hide it otherwise
+inputTextElem.addEventListener("input", () => {
+  if (inputTextElem.value.length > 0) {
+    closeIcon.style.display = "block";
+  } else {
+    closeIcon.style.display = "none";
+  }
+
+  // Limit input to 5000 characters
   if (inputTextElem.value.length > 5000) {
     inputTextElem.value = inputTextElem.value.slice(0, 5000);
   }
+
+  inputChars.innerHTML = inputTextElem.value.length;
   translate();
 });
 
-const uploadDocument = document.querySelector("#upload-document"),
-  uploadTitle = document.querySelector("#upload-title");
+// Clear the textarea when the close icon is clicked
+closeIcon.addEventListener("click", () => {
+  inputTextElem.value = "";
+  closeIcon.style.display = "none";
+  inputChars.innerHTML = "0";
+  translate();
+});
 
+// Handle file upload and processing
+const uploadDocument = document.querySelector("#upload-document");
 uploadDocument.addEventListener("change", (e) => {
   const file = e.target.files[0];
-  if (
-    file.type === "application/pdf" ||
-    file.type === "text/plain" ||
+  if (!file) return;
+
+  if (file.type === "application/pdf") {
+    readPDF(file);
+  } else if (
     file.type === "application/msword" ||
     file.type ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   ) {
-    uploadTitle.innerHTML = file.name;
+    readWord(file);
+  } else if (file.type === "text/plain") {
     const reader = new FileReader();
     reader.readAsText(file);
     reader.onload = (e) => {
@@ -118,28 +137,48 @@ uploadDocument.addEventListener("change", (e) => {
   }
 });
 
-const downloadBtn = document.querySelector("#download-btn");
+// Functions to read PDF and Word files
+function readPDF(file) {
+  const reader = new FileReader();
+  reader.readAsArrayBuffer(file);
+  reader.onload = (e) => {
+    const loadingTask = pdfjsLib.getDocument({ data: e.target.result });
+    loadingTask.promise.then((pdf) => {
+      let text = "";
+      let pagesPromises = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        pagesPromises.push(
+          pdf.getPage(i).then((page) =>
+            page.getTextContent().then((textContent) => {
+              textContent.items.forEach((item) => {
+                text += item.str + " ";
+              });
+            })
+          )
+        );
+      }
+      Promise.all(pagesPromises).then(() => {
+        inputTextElem.value = text.trim();
+        translate();
+      });
+    });
+  };
+}
 
-downloadBtn.addEventListener("click", (e) => {
-  const outputText = outputTextElem.value;
-  const outputLanguage =
-    outputLanguageDropdown.querySelector(".selected").dataset.value;
-  if (outputText) {
-    const blob = new Blob([outputText], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.download = `translated-to-${outputLanguage}.txt`;
-    a.href = url;
-    a.click();
-  }
-});
+function readWord(file) {
+  const reader = new FileReader();
+  reader.readAsArrayBuffer(file);
+  reader.onload = (e) => {
+    const arrayBuffer = e.target.result;
+    const zip = new PizZip(arrayBuffer);
+    const doc = new docxtemplater().loadZip(zip);
+    const text = doc.getFullText();
+    inputTextElem.value = text.trim();
+    translate();
+  };
+}
 
-
-const inputChars = document.querySelector("#input-chars");
-
-inputTextElem.addEventListener("input", (e) => {
-  inputChars.innerHTML = inputTextElem.value.length;
-});
+// Copy translated text to clipboard
 function copyToClipboard() {
   var outputText = document.getElementById("output-text");
   if (navigator.clipboard) {
@@ -150,7 +189,6 @@ function copyToClipboard() {
       .catch((error) => {
         console.error("Unable to copy to clipboard", error);
       });
-      
   } else {
     alert("Your browser doesn't support the Clipboard API. Please use a different method to copy the text.");
   }
@@ -158,11 +196,21 @@ function copyToClipboard() {
   copyPopup.style.opacity = 1;
 
   setTimeout(function() {
-      copyPopup.style.opacity = 0;
+    copyPopup.style.opacity = 0;
   }, 1500);
-  
-};
+}
 
-
-
-
+// Handle download of translated text
+const downloadBtn = document.querySelector("#download-btn");
+downloadBtn.addEventListener("click", () => {
+  const outputText = outputTextElem.value;
+  const outputLanguage = outputLanguageDropdown.querySelector(".selected").dataset.value;
+  if (outputText) {
+    const blob = new Blob([outputText], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.download = `translated-to-${outputLanguage}.txt`;
+    a.href = url;
+    a.click();
+  }
+});
